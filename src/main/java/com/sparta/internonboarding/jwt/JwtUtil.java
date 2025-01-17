@@ -1,7 +1,6 @@
 package com.sparta.internonboarding.jwt;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,5 +44,22 @@ public class JwtUtil {
                 .setExpiration(expiration)
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
+    }
+
+    public void validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+        } catch(ExpiredJwtException e) {
+            throw new RuntimeException("만료된 JWT token 입니다.");
+        } catch(SecurityException | MalformedJwtException e) {
+            throw new RuntimeException("유효하지 않는 JWT 서명 입니다.");
+        } catch(UnsupportedJwtException e) {
+            throw new RuntimeException("지원되지 않는 JWT 토큰 입니다.");
+        } catch(IllegalArgumentException e) {
+            throw new RuntimeException("잘못된 JWT 토큰 입니다.");
+        }
     }
 }
