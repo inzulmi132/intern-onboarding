@@ -21,3 +21,6 @@ spring:
   output:
     ansi:
       enabled: always
+
+jwt:
+  secret-key: Intern+Onboarding\\1234567890ABCDEF//==
