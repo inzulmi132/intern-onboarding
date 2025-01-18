@@ -164,4 +164,22 @@ class AuthControllerTest {
         assertNotEquals(invalidAccessToken, newAccessToken);
         assertNotEquals(refreshToken, newRefreshToken);
     }
+
+    @Test
+    @DisplayName("Access Token과 Refresh Token 모두 만료 시 예외 처리")
+    void test4() {
+        // given
+        when(mockJwtTokenType.getExpirationTime()).thenReturn(1000L * -1);
+        String invalidAccessToken = jwtUtil.generateToken(username, mockJwtTokenType);
+        String invalidRefreshToken = jwtUtil.generateToken(username, mockJwtTokenType);
+
+        // when - then
+        Throwable exception = assertThrows(RuntimeException.class,() -> mockMvc.perform(
+                        MockMvcRequestBuilders.get("/test")
+                                .header(JwtTokenType.ACCESS_TOKEN.getHeader(), JwtUtil.BEARER_PREFIX + invalidAccessToken)
+                                .header(JwtTokenType.REFRESH_TOKEN.getHeader(), JwtUtil.BEARER_PREFIX + invalidRefreshToken)
+                )
+        );
+        assertEquals(exception.getMessage(), "만료된 JWT 토큰 입니다.");
+    }
 }
