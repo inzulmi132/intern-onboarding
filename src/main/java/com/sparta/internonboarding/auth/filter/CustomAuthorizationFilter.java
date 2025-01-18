@@ -1,5 +1,6 @@
 package com.sparta.internonboarding.auth.filter;
 
+import com.sparta.internonboarding.auth.jwt.JwtTokenType;
 import com.sparta.internonboarding.auth.jwt.JwtUtil;
 import com.sparta.internonboarding.auth.userdetails.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
@@ -30,25 +31,23 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
+        String accessToken = jwtUtil.getTokenFromRequest(request, JwtTokenType.ACCESS_TOKEN);
         if(!StringUtils.hasText(accessToken)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         if(!jwtUtil.validateToken(accessToken)) {
-            String refreshToken = jwtUtil.getRefreshTokenFromRequest(request);
+            String refreshToken = jwtUtil.getTokenFromRequest(request, JwtTokenType.REFRESH_TOKEN);
             if(!StringUtils.hasText(refreshToken)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
             jwtUtil.validateRefreshToken(refreshToken, accessToken);
+
             String username = jwtUtil.getSubjectFromToken(accessToken);
-            accessToken = jwtUtil.generateAccessToken(username);
-            refreshToken = jwtUtil.generateRefreshToken(username);
-            response.addHeader(JwtUtil.AUTHORIZATION_HEADER, JwtUtil.BEARER_PREFIX + accessToken);
-            response.addHeader(JwtUtil.REFRESH_TOKEN, JwtUtil.BEARER_PREFIX + refreshToken);
+            jwtUtil.addTokenToResponse(username, response);
         }
 
         String username = jwtUtil.getSubjectFromToken(accessToken);
