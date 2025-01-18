@@ -12,6 +12,9 @@ import com.sparta.internonboarding.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,16 +28,19 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.LinkedHashMap;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
 
     private final String username = "JIN HO";
     private final String password = "12341234";
     private final String nickname = "Mentos";
+    @Mock
+    JwtTokenType mockJwtTokenType;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -112,5 +118,50 @@ class AuthControllerTest {
         assertNotNull(refreshToken);
         assertEquals(username, jwtUtil.getSubjectFromToken(accessToken));
         assertEquals(username, jwtUtil.getSubjectFromToken(refreshToken));
+    }
+
+    @Test
+    @DisplayName("Access Token 만료 시 Refresh Token 검증 후 Token 재발행")
+    void test3() throws Exception {
+        // given
+        when(mockJwtTokenType.getExpirationTime()).thenReturn(1000L * -1);
+        String invalidAccessToken = jwtUtil.generateToken(username, mockJwtTokenType);
+        String refreshToken = jwtUtil.generateToken(username, JwtTokenType.REFRESH_TOKEN);
+
+        userRepository.save(
+                User.builder()
+                        .username(username)
+                        .password(passwordEncoder.encode(password))
+                        .nickname(nickname)
+                        .userRole(UserRole.USER)
+                        .build()
+        );
+
+        // refresh token 의 재발급 확인을 위한 대기 시간
+        Thread.sleep(500);
+
+        // when
+        MvcResult result = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/test")
+                                .header(JwtTokenType.ACCESS_TOKEN.getHeader(), JwtUtil.BEARER_PREFIX + invalidAccessToken)
+                                .header(JwtTokenType.REFRESH_TOKEN.getHeader(), JwtUtil.BEARER_PREFIX + refreshToken)
+                )
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        String newAccessToken = result.getResponse().getHeader(JwtTokenType.ACCESS_TOKEN.getHeader());
+        if(newAccessToken != null) {
+            newAccessToken = newAccessToken.substring(JwtUtil.BEARER_PREFIX.length());
+        }
+        String newRefreshToken = result.getResponse().getHeader(JwtTokenType.REFRESH_TOKEN.getHeader());
+        if(newRefreshToken != null) {
+            newRefreshToken = newRefreshToken.substring(JwtUtil.BEARER_PREFIX.length());
+        }
+
+        // then
+        assertNotNull(newAccessToken);
+        assertNotNull(newRefreshToken);
+        assertNotEquals(invalidAccessToken, newAccessToken);
+        assertNotEquals(refreshToken, newRefreshToken);
     }
 }
