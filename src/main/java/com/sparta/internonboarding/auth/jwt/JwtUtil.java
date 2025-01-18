@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Objects;
 
 @Component
 public class JwtUtil {
@@ -51,14 +52,15 @@ public class JwtUtil {
                 .compact();
     }
 
-    public void validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
+            return true;
         } catch(ExpiredJwtException e) {
-            throw new RuntimeException("만료된 JWT token 입니다.");
+            return false;
         } catch(SecurityException | MalformedJwtException e) {
             throw new RuntimeException("유효하지 않는 JWT 서명 입니다.");
         } catch(UnsupportedJwtException e) {
@@ -68,7 +70,7 @@ public class JwtUtil {
         }
     }
 
-    public String getJwtFromRequest(HttpServletRequest request) {
+    public String getAccessTokenFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(BEARER_PREFIX.length());
@@ -76,12 +78,36 @@ public class JwtUtil {
         return null;
     }
 
+    public String getRefreshTokenFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader(REFRESH_TOKEN);
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(BEARER_PREFIX.length());
+        }
+        return null;
+    }
+
     public String getSubjectFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims().getSubject();
+        }
+    }
+
+    public void validateRefreshToken(String refreshToken, String accessToken) {
+        if(!validateToken(refreshToken)) {
+            throw new RuntimeException("만료된 JWT 토큰 입니다.");
+        }
+
+        String refreshTokenUsername = getSubjectFromToken(refreshToken);
+        String accessTokenUsername = getSubjectFromToken(accessToken);
+        if(!Objects.equals(refreshTokenUsername, accessTokenUsername)) {
+            throw new IllegalArgumentException("잘못된 JWT 토큰 입니다.");
+        }
     }
 }
