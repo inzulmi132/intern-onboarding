@@ -1,9 +1,9 @@
-package com.sparta.internonboarding.filter;
+package com.sparta.internonboarding.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sparta.internonboarding.dto.SignReqDto;
-import com.sparta.internonboarding.jwt.JwtUtil;
-import com.sparta.internonboarding.userdetails.UserDetailsImpl;
+import com.sparta.internonboarding.auth.dto.request.SignReqDto;
+import com.sparta.internonboarding.auth.jwt.JwtUtil;
+import com.sparta.internonboarding.auth.userdetails.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

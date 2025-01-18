@@ -1,4 +1,4 @@
-package com.sparta.internonboarding.userdetails;
+package com.sparta.internonboarding.auth.userdetails;
 
 import com.sparta.internonboarding.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

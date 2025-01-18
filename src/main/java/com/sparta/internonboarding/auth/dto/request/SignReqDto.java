@@ -1,4 +1,4 @@
-package com.sparta.internonboarding.dto;
+package com.sparta.internonboarding.auth.dto.request;
 
 import lombok.Getter;
 

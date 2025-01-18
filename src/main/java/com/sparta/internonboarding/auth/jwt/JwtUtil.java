@@ -1,4 +1,4 @@
-package com.sparta.internonboarding.jwt;
+package com.sparta.internonboarding.auth.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
