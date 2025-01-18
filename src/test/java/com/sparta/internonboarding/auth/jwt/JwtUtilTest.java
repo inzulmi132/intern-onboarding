@@ -37,4 +37,20 @@ class JwtUtilTest {
         assertTrue(jwtUtil.validateToken(accessToken));
         assertEquals(username, tokenUsername);
     }
+
+    @Test
+    @DisplayName("Refresh Token 발행 테스트")
+    void test2() {
+        // given
+        String username = "JIN HO";
+
+        // when
+        String refreshToken = jwtUtil.generateToken(username, JwtTokenType.REFRESH_TOKEN);
+        String tokenUsername = jwtUtil.getSubjectFromToken(refreshToken);
+
+        // then
+        assertNotNull(refreshToken);
+        assertTrue(jwtUtil.validateToken(refreshToken));
+        assertEquals(username, tokenUsername);
+    }
 }
