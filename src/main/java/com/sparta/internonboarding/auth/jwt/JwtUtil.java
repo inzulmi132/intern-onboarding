@@ -46,7 +46,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(subject)
                 .setExpiration(expiration)
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
