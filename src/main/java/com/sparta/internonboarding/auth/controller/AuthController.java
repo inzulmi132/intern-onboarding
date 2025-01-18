@@ -8,9 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,7 +23,7 @@ public class AuthController {
                 .body(authService.signup(repDto));
     }
 
-    @PostMapping("/test")
+    @GetMapping("/test")
     public ResponseEntity<String> test(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         String username = userDetails.getUsername();
         return ResponseEntity
