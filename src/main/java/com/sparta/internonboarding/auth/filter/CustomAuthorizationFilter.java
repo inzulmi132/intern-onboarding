@@ -1,5 +1,6 @@
 package com.sparta.internonboarding.auth.filter;
 
+import com.sparta.internonboarding.auth.jwt.JwtTokenType;
 import com.sparta.internonboarding.auth.jwt.JwtUtil;
 import com.sparta.internonboarding.auth.userdetails.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
@@ -30,14 +31,14 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        String accessToken = jwtUtil.getAccessTokenFromRequest(request);
+        String accessToken = jwtUtil.getTokenFromRequest(request, JwtTokenType.ACCESS_TOKEN);
         if(!StringUtils.hasText(accessToken)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         if(!jwtUtil.validateToken(accessToken)) {
-            String refreshToken = jwtUtil.getRefreshTokenFromRequest(request);
+            String refreshToken = jwtUtil.getTokenFromRequest(request, JwtTokenType.REFRESH_TOKEN);
             if(!StringUtils.hasText(refreshToken)) {
                 filterChain.doFilter(request, response);
                 return;

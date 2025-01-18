@@ -3,6 +3,7 @@ package com.sparta.internonboarding.auth.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.internonboarding.auth.dto.request.SignReqDto;
 import com.sparta.internonboarding.auth.dto.response.SignResDto;
+import com.sparta.internonboarding.auth.jwt.JwtTokenType;
 import com.sparta.internonboarding.auth.jwt.JwtUtil;
 import com.sparta.internonboarding.auth.userdetails.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
@@ -47,7 +48,9 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         String username = ((UserDetailsImpl) auth.getPrincipal()).getUsername();
         jwtUtil.addTokenToResponse(username, response);
 
-        String accessToken = response.getHeader(JwtUtil.AUTHORIZATION_HEADER).substring(JwtUtil.BEARER_PREFIX.length());
+        String accessToken = response
+                .getHeader(JwtTokenType.ACCESS_TOKEN.getHeader())
+                .substring(JwtUtil.BEARER_PREFIX.length());
         response.getWriter().write(new ObjectMapper().writeValueAsString(new SignResDto(accessToken)));
     }
 

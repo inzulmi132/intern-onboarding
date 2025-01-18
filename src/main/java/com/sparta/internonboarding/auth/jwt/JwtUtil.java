@@ -17,11 +17,7 @@ import java.util.Objects;
 @Component
 public class JwtUtil {
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
-    public static final String REFRESH_TOKEN = "refresh_token";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30; // 30분
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 3; // 3시간
 
     @Value("${jwt.secret-key}")
     private String secretKey;
@@ -33,19 +29,8 @@ public class JwtUtil {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    public String generateAccessToken(String subject) {
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
-        return generateToken(subject, expiration);
-    }
-
-    public String generateRefreshToken(String subject) {
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_TIME);
-        return generateToken(subject, expiration);
-    }
-
-    public String generateToken(String subject, Date expiration) {
+    public String generateToken(String subject, JwtTokenType tokenType) {
+        Date expiration = new Date(new Date().getTime() + tokenType.getExpirationTime());
         return Jwts.builder()
                 .setSubject(subject)
                 .setExpiration(expiration)
@@ -54,11 +39,11 @@ public class JwtUtil {
     }
 
     public void addTokenToResponse(String username, HttpServletResponse response) {
-        String accessToken = generateAccessToken(username);
-        String refreshToken = generateRefreshToken(username);
+        String accessToken = generateToken(username, JwtTokenType.ACCESS_TOKEN);
+        String refreshToken = generateToken(username, JwtTokenType.REFRESH_TOKEN);
 
-        response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + accessToken);
-        response.addHeader(REFRESH_TOKEN, BEARER_PREFIX + refreshToken);
+        response.addHeader(JwtTokenType.ACCESS_TOKEN.getHeader(), BEARER_PREFIX + accessToken);
+        response.addHeader(JwtTokenType.REFRESH_TOKEN.getHeader(), BEARER_PREFIX + refreshToken);
     }
 
     public boolean validateToken(String token) {
@@ -79,16 +64,8 @@ public class JwtUtil {
         }
     }
 
-    public String getAccessTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            return bearerToken.substring(BEARER_PREFIX.length());
-        }
-        return null;
-    }
-
-    public String getRefreshTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader(REFRESH_TOKEN);
+    public String getTokenFromRequest(HttpServletRequest request, JwtTokenType tokenType) {
+        String bearerToken = request.getHeader(tokenType.getHeader());
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(BEARER_PREFIX.length());
         }
@@ -103,7 +80,7 @@ public class JwtUtil {
                     .parseClaimsJws(token)
                     .getBody()
                     .getSubject();
-        } catch (ExpiredJwtException e) {
+        } catch(ExpiredJwtException e) {
             return e.getClaims().getSubject();
         }
     }
