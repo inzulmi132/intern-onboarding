@@ -2,6 +2,7 @@ package com.sparta.internonboarding.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.internonboarding.auth.dto.request.SignReqDto;
+import com.sparta.internonboarding.auth.dto.response.SignResDto;
 import com.sparta.internonboarding.auth.jwt.JwtUtil;
 import com.sparta.internonboarding.auth.userdetails.UserDetailsImpl;
 import jakarta.servlet.FilterChain;
@@ -42,10 +43,12 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) throws IOException {
         String username = ((UserDetailsImpl) auth.getPrincipal()).getUsername();
         String accessToken = jwtUtil.generateAccessToken(username);
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, JwtUtil.BEARER_PREFIX + accessToken);
+        response.setStatus(HttpStatus.OK.value());
+        response.getWriter().write(new ObjectMapper().writeValueAsString(new SignResDto(accessToken)));
     }
 
     @Override

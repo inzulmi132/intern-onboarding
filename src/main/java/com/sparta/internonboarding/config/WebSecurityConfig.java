@@ -31,7 +31,8 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean CustomAuthorizationFilter customAuthorizationFilter() {
+    @Bean
+    CustomAuthorizationFilter customAuthorizationFilter() {
         return new CustomAuthorizationFilter(jwtUtil, userDetailsService);
     }
 
