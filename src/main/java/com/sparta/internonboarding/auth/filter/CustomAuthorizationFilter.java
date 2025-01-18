@@ -1,7 +1,7 @@
-package com.sparta.internonboarding.filter;
+package com.sparta.internonboarding.auth.filter;
 
-import com.sparta.internonboarding.jwt.JwtUtil;
-import com.sparta.internonboarding.userdetails.UserDetailsServiceImpl;
+import com.sparta.internonboarding.auth.jwt.JwtUtil;
+import com.sparta.internonboarding.auth.userdetails.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,8 +35,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         if(StringUtils.hasText(accessToken)) {
             jwtUtil.validateToken(accessToken);
 
-            String userId = jwtUtil.getSubjectFromToken(accessToken);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+            String username = jwtUtil.getSubjectFromToken(accessToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             Authentication authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 

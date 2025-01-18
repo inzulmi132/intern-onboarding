@@ -1,9 +1,9 @@
 package com.sparta.internonboarding.config;
 
-import com.sparta.internonboarding.filter.CustomAuthenticationFilter;
-import com.sparta.internonboarding.filter.CustomAuthorizationFilter;
-import com.sparta.internonboarding.jwt.JwtUtil;
-import com.sparta.internonboarding.userdetails.UserDetailsServiceImpl;
+import com.sparta.internonboarding.auth.filter.CustomAuthenticationFilter;
+import com.sparta.internonboarding.auth.filter.CustomAuthorizationFilter;
+import com.sparta.internonboarding.auth.jwt.JwtUtil;
+import com.sparta.internonboarding.auth.userdetails.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,8 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean CustomAuthorizationFilter customAuthorizationFilter() {
+    @Bean
+    CustomAuthorizationFilter customAuthorizationFilter() {
         return new CustomAuthorizationFilter(jwtUtil, userDetailsService);
     }
 

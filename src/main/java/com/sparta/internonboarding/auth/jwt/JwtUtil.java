@@ -1,4 +1,4 @@
-package com.sparta.internonboarding.jwt;
+package com.sparta.internonboarding.auth.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -46,7 +46,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(subject)
                 .setExpiration(expiration)
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 

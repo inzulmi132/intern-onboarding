@@ -1,4 +1,4 @@
-package com.sparta.internonboarding.userdetails;
+package com.sparta.internonboarding.auth.userdetails;
 
 import com.sparta.internonboarding.user.entity.User;
 import lombok.Getter;
@@ -28,7 +28,7 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(() -> user.getUserRole().getAuthorityName());
+        authorities.add(() -> user.getUserRole().getAuthority());
         return authorities;
     }
 }

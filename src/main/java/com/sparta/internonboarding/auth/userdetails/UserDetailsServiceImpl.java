@@ -1,4 +1,4 @@
-package com.sparta.internonboarding.userdetails;
+package com.sparta.internonboarding.auth.userdetails;
 
 import com.sparta.internonboarding.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +14,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String userId) {
-        return userRepository.findById(Long.valueOf(userId))
+    public UserDetails loadUserByUsername(String username) {
+        return userRepository.findByUsername(username)
                 .map(UserDetailsImpl::new)
-                .orElseThrow(() -> new UsernameNotFoundException(userId));
+                .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 }
