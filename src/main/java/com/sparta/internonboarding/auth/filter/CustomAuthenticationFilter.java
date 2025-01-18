@@ -43,8 +43,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) {
-        String userId = ((UserDetailsImpl) auth.getPrincipal()).getUsername();
-        String accessToken = jwtUtil.generateAccessToken(userId);
+        String username = ((UserDetailsImpl) auth.getPrincipal()).getUsername();
+        String accessToken = jwtUtil.generateAccessToken(username);
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, JwtUtil.BEARER_PREFIX + accessToken);
     }
 

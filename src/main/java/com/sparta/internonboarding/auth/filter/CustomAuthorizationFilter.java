@@ -35,8 +35,8 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
         if(StringUtils.hasText(accessToken)) {
             jwtUtil.validateToken(accessToken);
 
-            String userId = jwtUtil.getSubjectFromToken(accessToken);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+            String username = jwtUtil.getSubjectFromToken(accessToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             Authentication authentication =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
