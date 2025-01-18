@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -50,6 +51,14 @@ public class JwtUtil {
                 .setExpiration(expiration)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public void addTokenToResponse(String username, HttpServletResponse response) {
+        String accessToken = generateAccessToken(username);
+        String refreshToken = generateRefreshToken(username);
+
+        response.addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + accessToken);
+        response.addHeader(REFRESH_TOKEN, BEARER_PREFIX + refreshToken);
     }
 
     public boolean validateToken(String token) {

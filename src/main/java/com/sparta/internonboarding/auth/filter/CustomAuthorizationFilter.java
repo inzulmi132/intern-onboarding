@@ -44,11 +44,9 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
             }
 
             jwtUtil.validateRefreshToken(refreshToken, accessToken);
+
             String username = jwtUtil.getSubjectFromToken(accessToken);
-            accessToken = jwtUtil.generateAccessToken(username);
-            refreshToken = jwtUtil.generateRefreshToken(username);
-            response.addHeader(JwtUtil.AUTHORIZATION_HEADER, JwtUtil.BEARER_PREFIX + accessToken);
-            response.addHeader(JwtUtil.REFRESH_TOKEN, JwtUtil.BEARER_PREFIX + refreshToken);
+            jwtUtil.addTokenToResponse(username, response);
         }
 
         String username = jwtUtil.getSubjectFromToken(accessToken);
