@@ -104,14 +104,8 @@ class AuthControllerTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn();
 
-        String accessToken = result.getResponse().getHeader(JwtTokenType.ACCESS_TOKEN.getHeader());
-        if(accessToken != null) {
-            accessToken = accessToken.substring(JwtUtil.BEARER_PREFIX.length());
-        }
-        String refreshToken = result.getResponse().getHeader(JwtTokenType.REFRESH_TOKEN.getHeader());
-        if(refreshToken != null) {
-            refreshToken = refreshToken.substring(JwtUtil.BEARER_PREFIX.length());
-        }
+        String accessToken = getTokenFromResult(result, JwtTokenType.ACCESS_TOKEN);
+        String refreshToken = getTokenFromResult(result, JwtTokenType.REFRESH_TOKEN);
 
         // then
         assertNotNull(accessToken);
@@ -149,14 +143,8 @@ class AuthControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
-        String newAccessToken = result.getResponse().getHeader(JwtTokenType.ACCESS_TOKEN.getHeader());
-        if(newAccessToken != null) {
-            newAccessToken = newAccessToken.substring(JwtUtil.BEARER_PREFIX.length());
-        }
-        String newRefreshToken = result.getResponse().getHeader(JwtTokenType.REFRESH_TOKEN.getHeader());
-        if(newRefreshToken != null) {
-            newRefreshToken = newRefreshToken.substring(JwtUtil.BEARER_PREFIX.length());
-        }
+        String newAccessToken = getTokenFromResult(result, JwtTokenType.ACCESS_TOKEN);
+        String newRefreshToken = getTokenFromResult(result, JwtTokenType.REFRESH_TOKEN);
 
         // then
         assertNotNull(newAccessToken);
@@ -174,12 +162,20 @@ class AuthControllerTest {
         String invalidRefreshToken = jwtUtil.generateToken(username, mockJwtTokenType);
 
         // when - then
-        Throwable exception = assertThrows(RuntimeException.class,() -> mockMvc.perform(
+        Throwable exception = assertThrows(RuntimeException.class, () -> mockMvc.perform(
                         MockMvcRequestBuilders.get("/test")
                                 .header(JwtTokenType.ACCESS_TOKEN.getHeader(), JwtUtil.BEARER_PREFIX + invalidAccessToken)
                                 .header(JwtTokenType.REFRESH_TOKEN.getHeader(), JwtUtil.BEARER_PREFIX + invalidRefreshToken)
                 )
         );
         assertEquals(exception.getMessage(), "만료된 JWT 토큰 입니다.");
+    }
+
+    private String getTokenFromResult(MvcResult result, JwtTokenType tokenType) {
+        String token = result.getResponse().getHeader(tokenType.getHeader());
+        if(token != null) {
+            return token.substring(JwtUtil.BEARER_PREFIX.length());
+        }
+        return null;
     }
 }
