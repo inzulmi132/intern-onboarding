@@ -5,6 +5,8 @@ import com.sparta.internonboarding.dto.request.SignupReqDto;
 import com.sparta.internonboarding.dto.response.SignResDto;
 import com.sparta.internonboarding.dto.response.SignupResDto;
 import com.sparta.internonboarding.dto.response.TestResDto;
+import com.sparta.internonboarding.exception.CustomApiException;
+import com.sparta.internonboarding.exception.ErrorCode;
 import com.sparta.internonboarding.service.AuthService;
 import com.sparta.internonboarding.userdetails.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -75,6 +77,6 @@ public class AuthController {
     )
     @PostMapping("/sign")
     public ResponseEntity<SignResDto> theFakeLogin(@RequestBody SignReqDto reqDto) {
-        throw new IllegalStateException("요청할 수 없는 API");
+        throw new CustomApiException(ErrorCode.UNEXPECTED_API_REQUEST);
     }
 }

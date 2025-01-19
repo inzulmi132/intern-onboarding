@@ -1,6 +1,8 @@
 package com.sparta.internonboarding.jwt;
 
 import com.sparta.internonboarding.enums.JwtTokenType;
+import com.sparta.internonboarding.exception.CustomApiException;
+import com.sparta.internonboarding.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -57,11 +59,11 @@ public class JwtUtil {
         } catch(ExpiredJwtException e) {
             return false;
         } catch(SecurityException | MalformedJwtException e) {
-            throw new RuntimeException("유효하지 않는 JWT 서명 입니다.");
+            throw new CustomApiException(ErrorCode.INVALID_JWT_SIGN);
         } catch(UnsupportedJwtException e) {
-            throw new RuntimeException("지원되지 않는 JWT 토큰 입니다.");
+            throw new CustomApiException(ErrorCode.UNSUPPORTED_JWT_TOKEN);
         } catch(IllegalArgumentException e) {
-            throw new RuntimeException("잘못된 JWT 토큰 입니다.");
+            throw new CustomApiException(ErrorCode.WRONG_JWT_TOKEN);
         }
     }
 
@@ -88,13 +90,13 @@ public class JwtUtil {
 
     public void validateRefreshToken(String refreshToken, String accessToken) {
         if(!validateToken(refreshToken)) {
-            throw new RuntimeException("만료된 JWT 토큰 입니다.");
+            throw new CustomApiException(ErrorCode.EXPIRED_JWT_TOKEN);
         }
 
         String refreshTokenUsername = getSubjectFromToken(refreshToken);
         String accessTokenUsername = getSubjectFromToken(accessToken);
         if(!Objects.equals(refreshTokenUsername, accessTokenUsername)) {
-            throw new IllegalArgumentException("잘못된 JWT 토큰 입니다.");
+            throw new CustomApiException(ErrorCode.WRONG_JWT_TOKEN);
         }
     }
 }
