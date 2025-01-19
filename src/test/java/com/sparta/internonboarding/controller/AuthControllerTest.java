@@ -5,6 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.sparta.internonboarding.dto.request.SignReqDto;
 import com.sparta.internonboarding.dto.request.SignupReqDto;
 import com.sparta.internonboarding.enums.JwtTokenType;
+import com.sparta.internonboarding.exception.CustomApiException;
 import com.sparta.internonboarding.jwt.JwtUtil;
 import com.sparta.internonboarding.entity.User;
 import com.sparta.internonboarding.enums.UserRole;
@@ -161,13 +162,13 @@ class AuthControllerTest {
         String invalidRefreshToken = jwtUtil.generateToken(username, mockJwtTokenType);
 
         // when - then
-        Throwable exception = assertThrows(RuntimeException.class, () -> mockMvc.perform(
+        CustomApiException exception = assertThrows(CustomApiException.class, () -> mockMvc.perform(
                         MockMvcRequestBuilders.get("/test")
                                 .header(JwtTokenType.ACCESS_TOKEN.getHeader(), JwtUtil.BEARER_PREFIX + invalidAccessToken)
                                 .header(JwtTokenType.REFRESH_TOKEN.getHeader(), JwtUtil.BEARER_PREFIX + invalidRefreshToken)
                 )
         );
-        assertEquals(exception.getMessage(), "만료된 JWT 토큰 입니다.");
+        assertEquals(exception.getErrorCode().getMessage(), "만료된 JWT 토큰 입니다.");
     }
 
     private String getTokenFromResult(MvcResult result, JwtTokenType tokenType) {
