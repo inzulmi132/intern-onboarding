@@ -118,9 +118,11 @@ class AuthControllerTest {
     @DisplayName("Access Token 만료 시 Refresh Token 검증 후 Token 재발행")
     void test3() throws Exception {
         // given
-        when(mockJwtTokenType.getExpirationTime()).thenReturn(1000L * -1);
+        when(mockJwtTokenType.getExpirationTime())
+                .thenReturn(1000L * -1)
+                .thenReturn(1000L * 30);
         String invalidAccessToken = jwtUtil.generateToken(username, mockJwtTokenType);
-        String refreshToken = jwtUtil.generateToken(username, JwtTokenType.REFRESH_TOKEN);
+        String refreshToken = jwtUtil.generateToken(username, mockJwtTokenType);
 
         userRepository.save(
                 User.builder()
@@ -130,9 +132,6 @@ class AuthControllerTest {
                         .userRole(UserRole.USER)
                         .build()
         );
-
-        // refresh token 의 재발급 확인을 위한 대기 시간
-        Thread.sleep(500);
 
         // when
         MvcResult result = mockMvc.perform(
